@@ -2,6 +2,9 @@
 
 namespace TopologicalSorting
 {
+    using System;
+    using System.Linq;
+
     /// <summary>
     /// Extensions to IEnumerable
     /// </summary>
@@ -134,6 +137,34 @@ namespace TopologicalSorting
                 follower.After(predecessors);
 
             return followers;
+        }
+
+
+
+        public static IEnumerable<T> TopologicalSort<T>(this IEnumerable<T> collection, Func<T, T, bool> isRequiredFor)
+        {
+            var graph = new DependencyGraph<T>();
+            var vertices = collection.Select(o => new OrderedProcess<T>(graph, o)).ToList();
+            foreach (var v1 in vertices)
+            {
+                foreach (var v2 in vertices)
+                {
+                    if (isRequiredFor(v1.Value, v2.Value))
+                    {
+                        v1.Before(v2);
+                    }
+                }
+            }
+
+            var sortEnumerator = graph.CalculateSort().GetEnumerator();
+            var orderedResults = new List<T>();
+
+            while (sortEnumerator.MoveNext())
+            {
+                orderedResults.Add((T)sortEnumerator.Current);
+            }
+
+            return orderedResults;
         }
     }
 }
