@@ -143,6 +143,11 @@ namespace TopologicalSorting
 
         public static IEnumerable<T> TopologicalSort<T>(this IEnumerable<T> collection, Func<T, T, bool> isRequiredFor)
         {
+            if (!collection.Any())
+            {
+                return new List<T>();
+            }
+
             var graph = new DependencyGraph<T>();
             var vertices = collection.Select(o => new OrderedProcess<T>(graph, o)).ToList();
             foreach (var v1 in vertices)
